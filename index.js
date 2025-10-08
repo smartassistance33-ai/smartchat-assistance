@@ -1,13 +1,16 @@
-import express from "express";
-import dotenv from "dotenv";
-import cors from "cors";
-import fetch from "node-fetch";
+const express = require("express");
+const dotenv = require("dotenv");
+const cors = require("cors");
+const fetch = require("node-fetch");
 
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from the 'public' directory
+app.use(express.static('public'));
 
 const N8N_URL = process.env.N8N_URL;
 
@@ -28,7 +31,6 @@ app.post("/message", async (req, res) => {
       return res.status(400).json({ error: "Missing userId or message." });
     }
 
-    // Example call to n8n
     const response = await fetch(`${N8N_URL}/webhook/smartchat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
