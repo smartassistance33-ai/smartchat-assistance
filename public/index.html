@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartChat Assistant 💬</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+  <div class="bg-white shadow-2xl rounded-2xl w-full max-w-md p-6">
+    <h1 class="text-2xl font-bold text-center text-blue-600 mb-4">SmartChat Assistant 🤖</h1>
+    <div id="chatBox" class="h-80 overflow-y-auto border rounded-md p-3 bg-gray-50 mb-3"></div>
+
+    <div class="flex">
+      <input id="userInput" type="text" placeholder="Type a message..." 
+        class="flex-1 border border-gray-300 rounded-l-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+      <button id="sendBtn" 
+        class="bg-blue-600 text-white px-4 rounded-r-md hover:bg-blue-700 transition">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById('chatBox');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    function appendMessage(sender, text) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = sender === 'user' 
+        ? 'text-right mb-2' 
+        : 'text-left mb-2';
+      msgDiv.innerHTML = `<span class="inline-block px-3 py-2 rounded-xl ${
+        sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-900'
+      }">${text}</span>`;
+      chatBox.appendChild(msgDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const message = userInput.value.trim();
+      if (!message) return;
+      appendMessage('user', message);
+      userInput.value = '';
+
+      const response = await fetch('/call', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tool: 'setup_auto_reply',
+          args: { keyword: 'user', reply: message }
+        })
+      });
+      const data = await response.json();
+      appendMessage('bot', data.status === 'ok' 
+        ? '✅ Your reply was received!' 
+        : '⚠ Something went wrong.');
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+  </script>
+</body>
+</html>
