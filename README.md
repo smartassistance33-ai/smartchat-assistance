@@ -1,17 +1,14 @@
-# SmartChat Assistant
+# SmartChat Assistant (Simplified)
 
-Welcome to the SmartChat Assistant! This is a complete, cloud-ready Node.js and Express application that serves as a backend for a multi-channel smart assistant. It provides a set of tools to manage leads, send messages, and configure auto-replies, all exposed through a secure and well-documented API.
+Welcome to the SmartChat Assistant! This is a lightweight, cloud-ready Node.js and Express application designed to serve as a simple webhook forwarder to an n8n service.
 
 ## Overview
 
-This project is designed to be easily deployable to any modern cloud environment that supports Node.js. It uses Supabase for its database backend and can integrate with n8n for workflow automation, such as sending WhatsApp messages.
-
-### Core Features
-- **Modern JavaScript**: Built with ES6+ syntax for clean and maintainable code.
-- **Environment-Based Configuration**: All sensitive keys and settings are managed through a `.env` file for maximum security and portability.
-- **Complete API**: Provides endpoints for health checks, tool discovery (MCP), and executing specific business logic.
-- **Robust Error Handling**: Implements `try/catch` blocks for all asynchronous operations to prevent crashes and provide clear error feedback.
-- **Request Logging**: Includes a middleware that logs every incoming request for easy debugging and monitoring.
+This project provides a clean and minimal backend that:
+- Receives a message via a `POST` request.
+- Forwards the message to a configurable n8n webhook.
+- Is built with modern, error-tolerant JavaScript.
+- Is configured securely through environment variables.
 
 ---
 
@@ -26,7 +23,7 @@ To get the project running locally, follow these steps:
     ```
 
 2.  **Install Dependencies**
-    Using npm, install all the required packages listed in `package.json`.
+    Using npm, install the required packages from `package.json`.
     ```bash
     npm install
     ```
@@ -35,27 +32,26 @@ To get the project running locally, follow these steps:
 
 ## Environment Setup
 
-Before running the application, you need to set up your environment variables.
+This project uses a `.env.template` file for configuration.
 
-1.  **Create a `.env` file** in the root of the project directory.
-2.  **Copy the contents** of the provided `.env.template` or add the following keys:
+1.  **Create your `.env` file** by copying the template.
+    ```bash
+    cp .env.template .env
+    ```
+
+2.  **Edit the `.env` file** and add your credentials:
 
     ```env
-    # Supabase Credentials
-    # Find these in your Supabase project's API settings
-    SUPABASE_URL=YOUR_SUPABASE_PROJECT_URL
-    SUPABASE_KEY=YOUR_SUPABASE_ANON_KEY
+    # The full URL for your n8n webhook endpoint
+    N8N_URL=YOUR_N8N_WEBHOOK_URL
 
-    # n8n Webhook URL for sending WhatsApp messages
-    N8N_WEBHOOK_URL=YOUR_N8N_WEBHOOK_URL
-
-    # Server Port (optional, defaults to 3000)
+    # The port the server will run on (defaults to 3000)
     PORT=3000
     ```
 
-3.  **Replace the placeholder values** (`YOUR_...`) with your actual credentials from Supabase and n8n.
+3.  **Replace `YOUR_N8N_WEBHOOK_URL`** with your actual n8n webhook URL.
 
-**Note:** The `.env` file contains sensitive information and should **never** be committed to version control. A `.gitignore` file is included to prevent this.
+**Note:** The `.env` file is included in `.gitignore` and should never be committed to version control.
 
 ---
 
@@ -63,55 +59,35 @@ Before running the application, you need to set up your environment variables.
 
 You can run the server in two modes:
 
-1.  **Development Mode**
-    This command uses `nodemon` to start the server. It will automatically watch for file changes and restart the server, which is ideal for development.
+1.  **Development Mode (`nodemon`)**
+    This command starts the server and automatically restarts it when you save a file.
     ```bash
     npm run dev
     ```
 
-2.  **Production Mode**
-    This command runs the application directly with `node`, which is optimized for production use.
+2.  **Production Mode (`node`)**
+    This command runs the application directly, which is suitable for a production environment.
     ```bash
     npm start
     ```
 
-Once started, the application will be available at `http://localhost:3000` (or the port you specified in your `.env` file).
+The server will be available at `http://localhost:3000` (or your configured port).
 
 ---
 
 ## API Endpoint Documentation
 
-Here are the available API endpoints:
-
 -   `GET /`
-    -   **Description**: Serves a user-friendly HTML dashboard with a title, links to other endpoints, and a simple form to test the `/call` endpoint.
+    -   **Description**: A simple endpoint to confirm that the API is running.
+    -   **Response**: A plain text message: `✅ SmartChat Assistance API is running successfully!`
 
--   `GET /health`
-    -   **Description**: A simple health check endpoint to confirm the server is running.
-    -   **Response**: `200 OK` with JSON `{ "status": "SmartChat Assistant is running" }`.
-
--   `GET /mcp`
-    -   **Description**: Returns a Machine-Readable Capability Profile (MCP) listing the available tools.
-    -   **Response**: `200 OK` with a JSON object containing a list of tools, their descriptions, and expected parameters.
-
--   `GET /lead/:id`
-    -   **Description**: Fetches a single lead from the Supabase `leads` table by its unique ID.
-    -   **Response**: `200 OK` with the lead object, or `404 Not Found` if the ID does not exist.
-
--   `GET /manifest`
-    -   **Description**: Provides a JSON manifest file for integration with services like the OpenAI Apps SDK.
-
--   `POST /call`
-    -   **Description**: The main endpoint for executing a tool. The tool to be executed is specified in the request body.
+-   `POST /message`
+    -   **Description**: Receives a message and forwards it to your configured n8n webhook.
     -   **Request Body**:
         ```json
         {
-          "tool_name": "name_of_the_tool",
-          "parameters": { ... }
+          "userId": "some_user_id",
+          "message": "Hello, world!"
         }
         ```
-    -   **Available Tools**:
-        -   `setup_auto_reply`: Saves an auto-reply rule to the `auto_replies` table in Supabase.
-        -   `view_leads`: Fetches and returns all entries from the `leads` table.
-        -   `send_message`: Sends a WhatsApp message via the configured n8n webhook.
-    -   **Response**: `200 OK` with a success message and any relevant data, or an appropriate error (`400` for bad requests, `500` for server errors).
+    -   **Response**: `200 OK` with the result from the n8n webhook, or an appropriate error message if the request fails.
