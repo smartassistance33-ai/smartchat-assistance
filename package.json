@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "dev": "node ./node_modules/nodemon/bin/nodemon.js index.js"
+    "dev": "nodemon index.js"
   },
   "dependencies": {
     "express": "^4.18.2",
