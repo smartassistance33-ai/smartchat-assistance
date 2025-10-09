@@ -117,18 +117,25 @@ app.get('/health', (req, res) => {
 
 app.get('/test-db', async (req, res) => {
   try {
+    console.log('Testing Supabase connection...');
+    console.log('SUPABASE_URL:', process.env.SUPABASE_URL ? 'Set ✓' : 'NOT SET ✗');
+    console.log('SUPABASE_ANON_KEY:', process.env.SUPABASE_ANON_KEY ? 'Set ✓' : 'NOT SET ✗');
+    
     const { data, error } = await supabase
       .from('tools')
       .select('*');
 
     if (error) {
+      console.error('Supabase error:', error);
       return res.status(500).json({ 
         success: false, 
         error: error.message,
+        errorCode: error.code,
         details: 'Make sure the "tools" table exists in your Supabase database and SUPABASE_URL and SUPABASE_ANON_KEY are properly configured.'
       });
     }
 
+    console.log('✅ Successfully fetched data from Supabase!');
     res.json({ 
       success: true, 
       message: 'Successfully connected to Supabase!',
@@ -136,9 +143,11 @@ app.get('/test-db', async (req, res) => {
       data 
     });
   } catch (err) {
+    console.error('Catch error:', err);
     res.status(500).json({ 
       success: false, 
-      error: err.message 
+      error: err.message,
+      errorType: err.constructor.name
     });
   }
 });
