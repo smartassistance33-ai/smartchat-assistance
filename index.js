@@ -16,7 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 
 const supabase = createClient(
   process.env.SUPABASE_URL || "https://your-supabase-url.supabase.co",
-  process.env.SUPABASE_KEY || "your-supabase-service-role-key"
+  process.env.SUPABASE_ANON_KEY || "your-supabase-anon-key"
 );
 
 app.get('/', (req, res) => {
@@ -44,7 +44,8 @@ app.get('/', (req, res) => {
       <div class="links">
         <p>
           <a href="/mcp" target="_blank">View /mcp</a> |
-          <a href="/health" target="_blank">View /health</a>
+          <a href="/health" target="_blank">View /health</a> |
+          <a href="/test-db" target="_blank">Test Database</a>
         </p>
       </div>
 
@@ -112,6 +113,34 @@ app.get('/', (req, res) => {
 
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
+
+app.get('/test-db', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('tools')
+      .select('*');
+
+    if (error) {
+      return res.status(500).json({ 
+        success: false, 
+        error: error.message,
+        details: 'Make sure the "tools" table exists in your Supabase database and SUPABASE_URL and SUPABASE_ANON_KEY are properly configured.'
+      });
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'Successfully connected to Supabase!',
+      rowCount: data?.length || 0,
+      data 
+    });
+  } catch (err) {
+    res.status(500).json({ 
+      success: false, 
+      error: err.message 
+    });
+  }
 });
 
 app.get('/mcp', (req, res) => {

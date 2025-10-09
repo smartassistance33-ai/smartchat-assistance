@@ -1,7 +1,7 @@
 # Smart Chat Assistant
 
 ## Overview
-A simple Node.js/Express web application that serves a static HTML page for a Smart Chat Assistant interface. The project uses ES modules and includes dependencies for Supabase integration and webhook functionality.
+A Node.js/Express web application with Supabase database integration for smart chat assistance. The project uses ES modules and includes dependencies for Supabase database operations and N8N webhook functionality.
 
 ## Recent Changes (October 9, 2025)
 - Fixed syntax errors in index.js (corrected template literal quotes and __dirname variable)
@@ -10,6 +10,9 @@ A simple Node.js/Express web application that serves a static HTML page for a Sm
 - Created .gitignore for Node.js project
 - Set up Server workflow with nodemon for development
 - Configured autoscale deployment with node index.js
+- **Updated Supabase connection to use SUPABASE_ANON_KEY** (correct key for client-side access)
+- **Added /test-db endpoint** to test Supabase connection and fetch data from "tools" table
+- Updated UI with "Test Database" link for easy database testing
 
 ## Project Structure
 ```
